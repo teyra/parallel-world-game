@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CardGame from "./Card";
 import { Button } from "../ui/button";
-import { useSignMessage, useAccount, useDisconnect } from "wagmi";
+import { useSignMessage, useAccount } from "wagmi";
 import { loginAPI } from "@/api";
 
 const Main = () => {
@@ -16,9 +16,11 @@ const Main = () => {
     }
   }, [isConnected]);
   const handleSign = async () => {
+    console.log("🚀 ~ handleSign ~ async:")
     const signature = await signMessageAsync({
       message: "Parallel World Game",
     });
+    console.log("🚀 ~ handleSign ~ signature:", signature)
     const data: any = await loginAPI({
       username: address,
       password: signature,

@@ -1,6 +1,8 @@
 "use client";
 import { sendPlayResultAPI } from "@/api";
 import React, { useState } from "react";
+import { parseAbi } from "viem";
+import { useAccount, useWriteContract } from "wagmi";
 
 const CardGame = () => {
   interface CardItem {
@@ -11,6 +13,8 @@ const CardGame = () => {
   const [cards, setCards] = useState<CardItem[]>([]); // 抽到的卡片
   const [remainingChances, setRemainingChances] = useState(5); // 剩余抽卡次数
   const [totalPoints, setTotalPoints] = useState(0); // 总点数
+  const { data: hash, writeContract } = useWriteContract();
+  const { address } = useAccount();
 
   const suits = ["♠", "♥", "♣", "♦"];
   const values = [
@@ -51,6 +55,39 @@ const CardGame = () => {
     }
   };
 
+  // 获取 NFT 的逻辑
+  const handleGetNFT = async () => {
+    try {
+      // 模拟调用获取 NFT 的 API
+      alert("正在获取 NFT...");
+      // 假设这里调用了一个 API
+      await getNFTAPI();
+      alert("NFT 获取成功！");
+    } catch (error) {
+      console.error("获取 NFT 失败", error);
+      alert("获取 NFT 失败，请稍后重试！");
+    }
+  };
+
+  const getNFTAPI = async () => {
+    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADRRESS;
+    const contractABI = parseAbi([
+      "function sendRequest(string[] memory args, address player) external returns (bytes32 requestId)",
+    ]);
+    // 准备调用合约
+    if (!address) {
+      throw new Error("Address is undefined. Please connect your wallet.");
+    }
+    const res = await writeContract({
+      address: contractAddress,
+      abi: contractABI,
+      functionName: "sendRequest",
+      args: [[address], address],
+    });
+    console.log("🚀 ~ getNFTAPI ~ res:", res);
+    console.log("🚀 ~ getNFTAPI ~ hash:", hash);
+  };
+
   // 重置游戏
   const resetGame = () => {
     setCards([]);
@@ -82,6 +119,12 @@ const CardGame = () => {
         重置游戏
       </button>
 
+      <button
+        onClick={handleGetNFT}
+        className="mb-6 px-6 py-3 bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 active:scale-95 transition-transform"
+      >
+        获取 NFT
+      </button>
       {/* 抽到的卡片展示 */}
       <div className="flex flex-wrap gap-4">
         {cards.map((card: CardItem, index: number) => (
